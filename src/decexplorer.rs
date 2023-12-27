@@ -10,15 +10,16 @@ impl Decexplorer {
     }
 
     pub fn dec_to_bin(&self) -> String {
-        let two = 2;
+        const TWO: i32 = 2;
+        const ZERO: i32 = 0;
         let mut self_container: i32 = self.value.parse().expect("failed to read struct number");
         let mut diff: i32 = 0;
         let mut final_string = String::new();
-        let one: String = '1'.to_string();
-        let zero: String = '0'.to_string();
-        while self_container > 0 {
-            diff = self_container % two;
-            self_container /= two;
+        let one: String = String::from("1");
+        let zero: String = String::from("0");
+        while self_container > ZERO {
+            diff = self_container % TWO;
+            self_container /= TWO;
             match diff {
                 0 => final_string.push_str(&zero),
                 1 => final_string.push_str(&one),
@@ -56,7 +57,6 @@ impl Decexplorer {
             if index == 4 && index < final_char_position {
                 tmp.push_str(&letter.to_string());
                 index = 1;
-                //println!("current string to be converted: {}", tmp.clone());
                 hex.push_str(&hex_converter(&reverse_string(tmp.clone())));
                 tmp = String::new();
             }
@@ -66,7 +66,6 @@ impl Decexplorer {
             } else if index < 4 && index == final_char_position {
                 tmp.push_str(&letter.to_string());
                 let no_zeroes = 4 - tmp.len() as u32;
-                //println!("tmp -> {}", tmp);
                 match no_zeroes {
                     3 => {
                         let temp = String::from("000");
@@ -82,7 +81,6 @@ impl Decexplorer {
                     }
                     _ => panic!("something went wrong, while encoding to binary"),
                 }
-                //println!("final reverse string -> {}, no zeroes value -> {}", tmp.clone(), no_zeroes);
                 hex.push_str(&hex_converter(&tmp.clone()));
             }
         }
@@ -90,15 +88,16 @@ impl Decexplorer {
     }
 
     pub fn hex_to_dec(&self) -> String {
+        const ONE: u32 = 1;
         let mut sum = 0;
         let mut index = 0;
         let hex: u32 = 16;
         for letter in self.value.chars() {
             sum += letter
-                .to_digit(16)
+                .to_digit(hex)
                 .expect("incorrect hexadecimal number parsing")
                 * (hex.pow(index));
-            index += 1;
+            index += ONE;
         }
         sum.to_string()
     }
@@ -113,25 +112,33 @@ impl Decexplorer {
 
     pub fn bin_to_oct(&self) -> String {
         const OCTAL_VALUE: usize = 3;
-        split_by_nth(reverse_string((*self.value).to_string()), OCTAL_VALUE)
-            .into_iter()
-            .map(|c| oct_converter(&c))
-            .collect()
+        reverse_string(
+            split_by_nth(reverse_string((*self.value).to_string()), OCTAL_VALUE)
+                .into_iter()
+                .map(|c| oct_converter(&reverse_string(c)))
+                .collect(),
+        )
     }
 }
 
 pub fn split_by_nth(s: String, splitter: usize) -> Vec<String> {
+    //s is the string we're trying to convert from binary to octal, the conversion is done by
+    //groups of 3 bits each starting from the left side to the right.
+    //In case the remaining bits would be less than 3, then a padding is applied to the left adding zeroes
+    //The splitter is the n number representing the number of bits to be grouped together
     let mut s = s;
+    const MINIMAL_LENGTH: usize = 1;
     const ZERO_BIT: &str = "0";
-    assert!(s.len() >= splitter);
+    const ZERO_VALUE: usize = 0;
+    assert!(s.len() >= MINIMAL_LENGTH);
     let mut vector: Vec<String> = Vec::new();
     while s.len() > splitter {
         let (chunk, rest) = s.split_at(splitter);
         vector.push(String::from(chunk));
         s = String::from(rest);
     }
-    if s.len() > 0 {
-        for _ in 0..s.len() - 1 {
+    if s.len() > ZERO_VALUE {
+        for _ in ZERO_VALUE..s.len() - MINIMAL_LENGTH {
             s.push_str(ZERO_BIT);
         }
         vector.push(s);
@@ -169,7 +176,6 @@ pub fn hex_converter(s1: &String) -> String {
 
 pub fn oct_converter(s1: &String) -> String {
     assert_eq!(3, s1.len());
-    println!("current value to be converted :  -> {}", s1.clone());
     let mut map: HashMap<String, String> = HashMap::with_capacity(8);
     map.insert(String::from("000"), String::from("0".to_string()));
     map.insert(String::from("001"), String::from("1".to_string()));
