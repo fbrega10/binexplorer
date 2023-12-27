@@ -5,6 +5,10 @@ pub struct Decexplorer {
 }
 
 impl Decexplorer {
+    pub fn from(s: String) -> Self {
+        Decexplorer { value: s }
+    }
+
     pub fn dec_to_bin(&self) -> String {
         let two = 2;
         let mut self_container: i32 = self.value.parse().expect("failed to read struct number");
@@ -108,74 +112,35 @@ impl Decexplorer {
     }
 
     pub fn bin_to_oct(&self) -> String {
-        let mut tmp = String::new();
-        let mut oct = String::new();
-        let three: u32 = 3;
-        let final_char_position: u32 = self.value.len() as u32;
-        let mut index: u32 = 1;
-        let mut total_index: u32 = 1;
-
-        for letter in self.value.chars() {
-            if index == three && total_index < final_char_position {
-                tmp.push_str(&letter.to_string());
-                index = 1;
-                total_index += 1;
-                println!(
-                    " 1) current string to be converted (reached three): {}",
-                    tmp.clone()
-                );
-                oct.push_str(&oct_converter(&reverse_string(tmp.clone())));
-                tmp = String::new();
-            }
-            if index < three && index < final_char_position {
-                tmp.push_str(&letter.to_string());
-                println!(
-                    " 2) current temporary string (building in progress) -> {}",
-                    tmp
-                );
-                index += 1;
-                total_index += 1;
-            } else if index <= three && total_index > final_char_position {
-                tmp.push_str(&letter.to_string());
-                let no_zeroes = three - tmp.len() as u32;
-                println!("tmp -> {}, match zeroes -> {}", tmp, no_zeroes);
-                match no_zeroes {
-                    2 => {
-                        let temp = String::from("00");
-                        tmp = temp + &tmp.clone();
-                    }
-                    1 => {
-                        let temp = String::from("0");
-                        tmp = temp + &tmp.clone();
-                    }
-                    0 => println!("perfect parsing, no need for padding"),
-                    _ => panic!("invalid set of characters, octal "),
-                }
-                println!(
-                    " 3) final reverse string -> {}, no zeroes value -> {}",
-                    tmp.clone(),
-                    no_zeroes
-                );
-                oct.push_str(&oct_converter(&tmp.clone()));
-            }
-            println!("final recap, string tmp : {} | total index(incremental)  -> {} | , final position -> {} | index -> {}", tmp.clone(), total_index, self.value.len(), index );
-        }
-        oct
+        const OCTAL_VALUE: usize = 3;
+        split_by_nth(reverse_string((*self.value).to_string()), OCTAL_VALUE)
+            .into_iter()
+            .map(|c| oct_converter(&c))
+            .collect()
     }
 }
 
-pub fn reverse_string(s1: String) -> String {
-    //utility method to reverse a String, maintaining the same capacity
-    let mut string_final = String::with_capacity(s1.len());
-    let mut x: Vec<char> = Vec::with_capacity(s1.len());
-    for ch in s1.chars() {
-        x.push(ch);
+pub fn split_by_nth(s: String, splitter: usize) -> Vec<String> {
+    let mut s = s;
+    const ZERO_BIT: &str = "0";
+    assert!(s.len() >= splitter);
+    let mut vector: Vec<String> = Vec::new();
+    while s.len() > splitter {
+        let (chunk, rest) = s.split_at(splitter);
+        vector.push(String::from(chunk));
+        s = String::from(rest);
     }
-    x.reverse();
-    for ch in x {
-        string_final.push_str(&ch.to_string());
+    if s.len() > 0 {
+        for _ in 0..s.len() - 1 {
+            s.push_str(ZERO_BIT);
+        }
+        vector.push(s);
     }
-    string_final
+    vector
+}
+
+pub fn reverse_string(s: String) -> String {
+    s.chars().rev().collect()
 }
 
 pub fn hex_converter(s1: &String) -> String {
