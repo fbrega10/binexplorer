@@ -13,7 +13,7 @@ impl Decexplorer {
         const TWO: i32 = 2;
         const ZERO: i32 = 0;
         let mut self_container: i32 = self.value.parse().expect("failed to read struct number");
-        let mut diff: i32 = 0;
+        let mut diff: i32;
         let mut final_string = String::new();
         let one: String = String::from("1");
         let zero: String = String::from("0");
