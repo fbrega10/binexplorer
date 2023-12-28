@@ -49,44 +49,13 @@ impl Decexplorer {
     }
 
     pub fn bin_to_hex(&self) -> String {
-        let mut tmp = String::new();
-        let mut hex = String::new();
-        let _four: u32 = 4;
-        let final_char_position: u32 = self.value.len() as u32;
-        let mut index: u32 = 1;
-
-        for letter in self.value.chars() {
-            if index == 4 && index < final_char_position {
-                tmp.push_str(&letter.to_string());
-                index = 1;
-                hex.push_str(&hex_converter(&reverse_string(tmp.clone())));
-                tmp = String::new();
-            }
-            if index < 4 && index < final_char_position {
-                tmp.push_str(&letter.to_string());
-                index += 1;
-            } else if index < 4 && index == final_char_position {
-                tmp.push_str(&letter.to_string());
-                let no_zeroes = 4 - tmp.len() as u32;
-                match no_zeroes {
-                    3 => {
-                        let temp = String::from("000");
-                        tmp = temp + &tmp.clone();
-                    }
-                    2 => {
-                        let temp = String::from("00");
-                        tmp = temp + &tmp.clone();
-                    }
-                    1 => {
-                        let temp = String::from("0");
-                        tmp = temp + &tmp.clone();
-                    }
-                    _ => panic!("something went wrong, while encoding to binary"),
-                }
-                hex.push_str(&hex_converter(&tmp.clone()));
-            }
-        }
-        hex
+        const HEX_VALUE: usize = 4;
+        reverse_string(
+            split_by_nth(reverse_string((*self.value).to_string()), HEX_VALUE)
+                .into_iter()
+                .map(|c| hex_converter(&reverse_string(c)))
+                .collect(),
+        )
     }
 
     pub fn hex_to_dec(&self) -> String {
