@@ -29,21 +29,23 @@ impl Decexplorer {
         reverse_string(final_string)
     }
 
-    pub fn bin_to_dec(&self) -> i32 {
+    pub fn bin_to_dec(&self) -> String {
+        //this function translates binaries to decimal formats
+        const ONE: u32 = 1;
+        const LIT_ONE: char = '1';
+        const LIT_ZERO: char = '0';
+        const TWO: i32 = 2;
         let mut power_index: u32 = 0;
         let mut result: i32 = 0;
-        let two: i32 = 2;
-        for letter in self.value.chars() {
-            match letter {
-                '1' => {
-                    result += two.pow(power_index);
-                    power_index += 1;
-                }
-                '0' => power_index += 1,
-                _ => panic!("unable to parse number, not a binary format"),
+        self.value.chars().rev().for_each(|c| match c {
+            LIT_ONE => {
+                result += TWO.pow(power_index);
+                power_index += ONE;
             }
-        }
-        result
+            LIT_ZERO => power_index += ONE,
+            _ => panic!("Unable to parse binary number, must be all zeroes and ones"),
+        });
+        result.to_string()
     }
 
     pub fn bin_to_hex(&self) -> String {
@@ -132,13 +134,13 @@ pub fn split_by_nth(s: String, splitter: usize) -> Vec<String> {
     const ZERO_VALUE: usize = 0;
     assert!(s.len() >= MINIMAL_LENGTH);
     let mut vector: Vec<String> = Vec::new();
-    while s.len() > splitter {
+    while s.len() >= splitter {
         let (chunk, rest) = s.split_at(splitter);
         vector.push(String::from(chunk));
         s = String::from(rest);
     }
     if s.len() > ZERO_VALUE {
-        for _ in ZERO_VALUE..s.len() - MINIMAL_LENGTH {
+        for _ in ZERO_VALUE..splitter - s.len() {
             s.push_str(ZERO_BIT);
         }
         vector.push(s);
